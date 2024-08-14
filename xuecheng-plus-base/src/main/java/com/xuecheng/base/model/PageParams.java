@@ -3,6 +3,7 @@ package com.xuecheng.base.model;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.ToString;
+import lombok.experimental.Accessors;
 
 /**
  * @author Mr.M
@@ -12,6 +13,7 @@ import lombok.ToString;
  */
 @Data
 @ToString
+@Accessors(chain = true)
 public class PageParams {
 
     //当前页码

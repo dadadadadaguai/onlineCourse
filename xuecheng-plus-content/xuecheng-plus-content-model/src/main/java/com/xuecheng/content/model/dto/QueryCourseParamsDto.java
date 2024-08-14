@@ -2,6 +2,7 @@ package com.xuecheng.content.model.dto;
 
 import lombok.Data;
 import lombok.ToString;
+import lombok.experimental.Accessors;
 
 /**
  * @author Mr.M
@@ -11,6 +12,7 @@ import lombok.ToString;
  */
 @Data
 @ToString
+@Accessors(chain = true)
 public class QueryCourseParamsDto {
 
     //审核状态
