@@ -2,6 +2,7 @@ package com.xuecheng.content.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.xuecheng.base.exception.XueChengPlusException;
 import com.xuecheng.base.model.PageParams;
 import com.xuecheng.base.model.PageResult;
 import com.xuecheng.content.mapper.CourseBaseMapper;
@@ -91,25 +92,25 @@ public class CourseBaseInfoServiceImpl implements CourseBaseInfoService {
   @Override
   public CourseBaseInfoDto createCourseBase(Long companyId, @NotNull AddCourseDto dto) {
     if (StringUtils.isBlank(dto.getName())) {
-      throw new RuntimeException("课程名称为空");
+      throw new XueChengPlusException("课程名称为空");
     }
     if (StringUtils.isBlank(dto.getMt())) {
-      throw new RuntimeException("课程分类为空");
+      throw new XueChengPlusException("课程分类为空");
     }
     if (StringUtils.isBlank(dto.getSt())) {
-      throw new RuntimeException("课程分类为空");
+      throw new XueChengPlusException("课程分类为空");
     }
     if (StringUtils.isBlank(dto.getUsers())) {
-      throw new RuntimeException("适用人群为空");
+      throw new XueChengPlusException("适用人群为空");
     }
     if (StringUtils.isBlank(dto.getGrade())) {
-      throw new RuntimeException("课程等级为空");
+      throw new XueChengPlusException("课程等级为空");
     }
     if (StringUtils.isBlank(dto.getTeachmode())) {
-      throw new RuntimeException("教学模式为空");
+      throw new XueChengPlusException("教学模式为空");
     }
     if (StringUtils.isBlank(dto.getCharge())) {
-      throw new RuntimeException("收费规则为空");
+      throw new XueChengPlusException("收费规则为空");
     }
     CourseBase courseBase = new CourseBase();
     BeanUtils.copyProperties(dto, courseBase);
@@ -145,7 +146,7 @@ public class CourseBaseInfoServiceImpl implements CourseBaseInfoService {
       BeanUtils.copyProperties(courseMarket, courseBaseInfoDto);
     }
 
-    //设置大分类、小分类名称
+    // 设置大分类、小分类名称
     CourseBase courseBaseByMt = courseBaseMapper.selectById(courseBase.getMt());
     courseBaseInfoDto.setMt(courseBaseByMt.getMt());
     CourseBase courseBaseBySt = courseBaseMapper.selectById(courseBase.getSt());
