@@ -6,11 +6,13 @@ import com.xuecheng.base.exception.XueChengPlusException;
 import com.xuecheng.base.model.PageParams;
 import com.xuecheng.base.model.PageResult;
 import com.xuecheng.content.mapper.CourseBaseMapper;
+import com.xuecheng.content.mapper.CourseCategoryMapper;
 import com.xuecheng.content.mapper.CourseMarketMapper;
 import com.xuecheng.content.model.constant.CourseCharging;
 import com.xuecheng.content.model.constant.CourseReleaseConstant;
 import com.xuecheng.content.model.dto.AddCourseDto;
 import com.xuecheng.content.model.dto.CourseBaseInfoDto;
+import com.xuecheng.content.model.dto.EditCourseDto;
 import com.xuecheng.content.model.dto.QueryCourseParamsDto;
 import com.xuecheng.content.model.po.CourseBase;
 import com.xuecheng.content.model.po.CourseMarket;
@@ -31,12 +33,16 @@ public class CourseBaseInfoServiceImpl implements CourseBaseInfoService {
 
   private final CourseMarketMapper CourseMarketMapper;
   private final CourseMarketMapper courseMarketMapper;
+  private final CourseCategoryMapper courseCategoryMapper;
 
   public CourseBaseInfoServiceImpl(
-      CourseBaseMapper courseBaseMapper, CourseMarketMapper courseMarketMapper) {
+      CourseBaseMapper courseBaseMapper,
+      CourseMarketMapper courseMarketMapper,
+      CourseCategoryMapper courseCategoryMapper) {
     this.courseBaseMapper = courseBaseMapper;
     CourseMarketMapper = courseMarketMapper;
     this.courseMarketMapper = courseMarketMapper;
+    this.courseCategoryMapper = courseCategoryMapper;
   }
 
   /**
@@ -131,6 +137,59 @@ public class CourseBaseInfoServiceImpl implements CourseBaseInfoService {
       throw new RuntimeException("新增课程营销信息失败");
     }
     return getCourseBaseInfoDto(courseBase.getId());
+  }
+
+  /**
+   * 根据课程Id查询课程基本信息
+   *
+   * @param courseId
+   * @return
+   */
+  @Transactional
+  @Override
+  public CourseBaseInfoDto getCourseBaseInfoById(Long courseId) {
+    CourseBase courseBase = courseBaseMapper.selectById(courseId);
+    if (courseBase == null) {
+      return null;
+    }
+    CourseMarket courseMarket = courseMarketMapper.selectById(courseId);
+    CourseBaseInfoDto courseBaseInfoDto = new CourseBaseInfoDto();
+    BeanUtils.copyProperties(courseBase, courseBaseInfoDto);
+    if (courseMarket != null) {
+      BeanUtils.copyProperties(courseMarket, courseBaseInfoDto);
+    }
+    courseBaseInfoDto.setMtName(courseCategoryMapper.selectById(courseBase.getMt()).getName());
+    courseBaseInfoDto.setStName(courseCategoryMapper.selectById(courseBase.getSt()).getName());
+    return courseBaseInfoDto;
+  }
+
+  /**
+   * 修改课程信息
+   *
+   * @param id
+   * @param editCourseDto
+   * @return
+   */
+  @Transactional
+  @Override
+  public CourseBaseInfoDto modifyCourseBase(Long id, EditCourseDto editCourseDto) {
+    Long coureseId = editCourseDto.getId();
+    CourseBase courseBase = courseBaseMapper.selectById(coureseId);
+    if (courseBase == null) {
+      XueChengPlusException.cast("课程不存在");
+    }
+    if (!id.equals(courseBase.getCompanyId())) {
+      XueChengPlusException.cast("不允许修改其他租户的课程");
+    }
+    BeanUtils.copyProperties(editCourseDto, courseBase);
+    courseBase.setChangeDate(LocalDateTime.now());
+    // 更新课程基本信息
+    int i = courseBaseMapper.updateById(courseBase);
+    CourseMarket courseMarket = courseMarketMapper.selectById(coureseId);
+    BeanUtils.copyProperties(editCourseDto, courseMarket);
+    saveCourseMarket(courseMarket);
+    CourseBaseInfoDto courseBaseInfoDto = this.getCourseBaseInfoDto(coureseId);
+    return courseBaseInfoDto;
   }
 
   // 获取课程基本信息及课程营销信息
